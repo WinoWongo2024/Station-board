@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Leeds Station - Concourse Display</title>
+  <title>Leeds Station - Concourse Board</title>
   <style>
     :root {
       --bg-black: #000000;
+      --board-frame: #121820;
       --screen-bg: #030508;
-      --card-border: #1a2332;
+      --border-dark: #1b2432;
       --text-white: #ffffff;
-      --text-gray: #94a3b8;
-      --text-yellow: #ffcc00;
-      --status-ontime: #ffffff;
-      --status-delayed: #ffcc00;
-      --status-cancelled: #ff4d4d;
+      --text-gray: #8e9bb0;
+      --text-amber: #fabb15;
+      --text-red: #ff4d4d;
       --font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
 
@@ -34,7 +33,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px) 12px;
+      padding: calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 8px) 8px;
     }
 
     .mobile-container {
@@ -42,26 +41,27 @@
       max-width: 430px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
+    /* Main Physical Metal Frame */
     .concourse-frame {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       width: 100%;
-      background-color: #0c0f14;
-      padding: 10px;
-      border: 2px solid #1c2430;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      background-color: var(--board-frame);
+      padding: 8px;
+      border: 2px solid #283344;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
     }
 
     .board-screen {
       background-color: var(--screen-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 10px 12px;
+      border: 1px solid var(--border-dark);
+      border-radius: 6px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
     }
@@ -70,21 +70,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #222d3d;
+      border-bottom: 1px solid #1a2536;
       padding-bottom: 4px;
       margin-bottom: 6px;
     }
 
     .screen-title {
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 0.9rem;
+      font-weight: 800;
       color: var(--text-white);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .page-tag {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--text-gray);
     }
@@ -92,15 +92,15 @@
     .dept-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .dept-item {
       display: flex;
       flex-direction: column;
       width: 100%;
-      padding-bottom: 6px;
-      border-bottom: 1px dashed #141c28;
+      padding-bottom: 4px;
+      border-bottom: 1px dashed #121a26;
     }
 
     .dept-main-row {
@@ -108,19 +108,19 @@
       justify-content: space-between;
       align-items: baseline;
       width: 100%;
-      gap: 6px;
+      gap: 4px;
     }
 
     .dept-time {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.9rem;
       color: var(--text-white);
       font-family: ui-monospace, SFMono-Regular, monospace;
-      min-width: 45px;
+      min-width: 44px;
     }
 
     .dept-dest {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.95rem;
       color: var(--text-white);
       white-space: nowrap;
@@ -131,68 +131,66 @@
     }
 
     .dept-plat {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.85rem;
       color: var(--text-white);
       text-align: center;
       font-family: ui-monospace, SFMono-Regular, monospace;
-      min-width: 35px;
+      min-width: 32px;
     }
 
     .dept-status {
-      font-weight: 700;
-      font-size: 0.8rem;
+      font-weight: 800;
+      font-size: 0.82rem;
       text-align: right;
       min-width: 65px;
     }
 
-    .status-ontime { color: var(--status-ontime); }
-    .status-delayed { color: var(--status-delayed); }
-    .status-cancelled { color: var(--status-cancelled); }
+    .status-ontime { color: var(--text-white); }
+    .status-delayed { color: var(--text-amber); }
+    .status-cancelled { color: var(--text-red); }
 
-    /* FULL-WIDTH SCROLLING MARQUEE */
+    /* Full-Width Continuous Marquee Line */
     .marquee-container {
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
-      margin-top: 3px;
+      margin-top: 2px;
       position: relative;
     }
 
     .marquee-text {
       display: inline-block;
-      font-size: 0.72rem;
+      font-size: 0.73rem;
       color: var(--text-gray);
       font-family: ui-monospace, SFMono-Regular, monospace;
       padding-left: 100%;
-      animation: continuousMarquee 14s linear infinite;
+      animation: continuousMarquee 15s linear infinite;
       will-change: transform;
     }
 
     .marquee-text.notice {
-      color: var(--text-yellow);
+      color: var(--text-amber);
+      font-weight: 600;
     }
 
     @keyframes continuousMarquee {
-      0% {
-        transform: translate3d(0, 0, 0);
-      }
-      100% {
-        transform: translate3d(-100%, 0, 0);
-      }
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
     }
 
+    /* Screen 3: Welcome & Real-Time Clock Panel */
     .welcome-screen {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
+      padding: 10px 14px;
       background: linear-gradient(180deg, #05080e 0%, #030508 100%);
     }
 
     .welcome-text {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 800;
       line-height: 1.1;
       color: var(--text-white);
@@ -208,32 +206,33 @@
     }
 
     .clock-hhmm {
-      font-size: 2.2rem;
+      font-size: 2.3rem;
       font-weight: 800;
       letter-spacing: -1px;
       line-height: 1;
     }
 
     .clock-ss {
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.15rem;
+      font-weight: 800;
       line-height: 1;
       margin-left: 1px;
-      color: var(--text-yellow);
+      color: var(--text-amber);
     }
 
+    /* Coach Formation Sub-Panel */
     .sub-panel {
       width: 100%;
-      background-color: #0c0f14;
-      border: 1px solid #1c2430;
-      border-radius: 10px;
-      padding: 10px 12px;
+      background-color: var(--board-frame);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 8px 10px;
     }
 
     .sub-panel-title {
-      color: var(--text-yellow);
+      color: var(--text-amber);
       font-size: 0.7rem;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
@@ -244,7 +243,7 @@
 
     .formation-row {
       display: flex;
-      gap: 6px;
+      gap: 5px;
       align-items: center;
       overflow-x: auto;
       padding-bottom: 2px;
@@ -266,6 +265,7 @@
     .coach-box.first {
       background-color: #854d0e;
       border-color: #a16207;
+      color: var(--text-white);
     }
   </style>
 </head>
@@ -274,6 +274,7 @@
   <div class="mobile-container">
     <div class="concourse-frame">
       
+      <!-- SCREEN 1: DEPARTURES -->
       <div class="board-screen">
         <div class="screen-header">
           <span class="screen-title">Departures</span>
@@ -282,6 +283,7 @@
         <div class="dept-list" id="screen1-list"></div>
       </div>
 
+      <!-- SCREEN 2: DEPARTURES -->
       <div class="board-screen">
         <div class="screen-header">
           <span class="screen-title">Departures</span>
@@ -290,19 +292,21 @@
         <div class="dept-list" id="screen2-list"></div>
       </div>
 
+      <!-- SCREEN 3: WELCOME TO LEEDS & REAL-TIME CLOCK -->
       <div class="board-screen welcome-screen">
         <div class="welcome-text">
           Welcome<br>to Leeds
         </div>
 
         <div class="clock-box">
-          <span class="clock-hhmm" id="clock-hhmm">08:10</span>
-          <span class="clock-ss" id="clock-ss">19</span>
+          <span class="clock-hhmm" id="clock-hhmm">00:21</span>
+          <span class="clock-ss" id="clock-ss">18</span>
         </div>
       </div>
 
     </div>
 
+    <!-- COACH FORMATION SUB-PANEL -->
     <div class="sub-panel">
       <div class="sub-panel-title" id="next-service-label">Next Service Coach Formation</div>
       <div class="formation-row" id="formation-row"></div>
@@ -310,32 +314,29 @@
   </div>
 
   <script>
+    // Pool of realistic UK Train departures with Security/BTP & Station notices
     const destinationsPool = [
-      { name: "Chester", stops: "Calling at: Bramley, New Pudsey, Bradford Interchange, Halifax, Chester" },
-      { name: "Hull", stops: "Calling at: Cross Gates, Garforth, Selby, Brough, Hull" },
-      { name: "Ilkley", stops: "Calling at: Kirkstall Forge, Guiseley, Menston, Burley-in-Wharfedale, Ilkley" },
-      { name: "Plymouth", stops: "Calling at: Wakefield Westgate, Sheffield, Derby, Birmingham New Street, Bristol Temple Meads, Plymouth" },
-      { name: "Bradford F Sq", stops: "Calling at: Shipley, Frizinghall, Bradford Forster Square" },
-      { name: "Manchester Vic", stops: "Calling at: Pudsey, Bradford, Halifax, Hebden Bridge, Todmorden, Manchester Victoria" },
-      { name: "Redcar Central", stops: "Calling at: York, Thirsk, Northallerton, Middlesbrough, Redcar Central" },
-      { name: "London Kings X", stops: "Calling at: Wakefield Westgate, Doncaster, Peterborough, London King's Cross • Reserve seats at LNER.co.uk", notice: true },
-      { name: "Liverpool L St", stops: "Calling at: Huddersfield, Stalybridge, Manchester Victoria, Liverpool Lime Street" },
-      { name: "York", stops: "Calling at: Cross Gates, Garforth, Micklefield, Church Fenton, York" },
-      { name: "Wigan Wallgate", stops: "Calling at: Halifax, Todmorden, Rochdale, Manchester, Wigan Wallgate" },
-      { name: "Morecambe", stops: "Calling at: Shipley, Bingley, Keighley, Skipton, Lancaster, Morecambe" },
-      { name: "Halifax", stops: "Bus replacement will depart from Wellington Street for all intermediate stops", notice: true },
-      { name: "Doncaster", stops: "Calling at: Outwood, Wakefield Kirkgate, Fitzwilliam, Doncaster" },
-      { name: "Skipton", stops: "Calling at: Kirkstall Forge, Shipley, Bingley, Keighley, Skipton" },
-      { name: "Knaresborough", stops: "Calling at: Burley Park, Headingley, Horsforth, Pannal, Harrogate, Knaresborough" }
+      { name: "ILKLEY", stops: "Calling at: Kirkstall Forge, Guiseley, Menston, Burley-in-Wharfedale, Ilkley" },
+      { name: "PLYMOUTH", stops: "Calling at: Wakefield Westgate, Sheffield, Derby, Birmingham New Street, Bristol Temple Meads, Plymouth" },
+      { name: "BRADFORD F SQ", stops: "Calling at: Shipley, Frizinghall, Bradford Forster Square" },
+      { name: "MANCHESTER VIC", stops: "Calling at: Pudsey, Bradford, Halifax, Hebden Bridge, Todmorden, Manchester Victoria" },
+      { name: "REDCAR CENTRAL", stops: "Calling at: York, Thirsk, Northallerton, Middlesbrough, Redcar Central" },
+      { name: "LONDON KINGS X", stops: "Calling at: Wakefield Westgate, Doncaster, Peterborough, London King's Cross • BTP: See it. Say it. Sorted. Text 61016", notice: true },
+      { name: "LIVERPOOL L ST", stops: "Calling at: Huddersfield, Stalybridge, Manchester Victoria, Liverpool Lime Street" },
+      { name: "YORK", stops: "Calling at: Cross Gates, Garforth, Micklefield, Church Fenton, York" },
+      { name: "CHESTER", stops: "Calling at: Bramley, New Pudsey, Bradford Interchange, Halifax, Chester" },
+      { name: "MORECAMBE", stops: "Calling at: Shipley, Bingley, Keighley, Skipton, Lancaster, Morecambe" },
+      { name: "HALIFAX", stops: "Bus replacement will depart from Wellington Street • Report unusual behavior to British Transport Police", notice: true },
+      { name: "DONCASTER", stops: "Calling at: Outwood, Wakefield Kirkgate, Fitzwilliam, Doncaster" }
     ];
 
-    const platformsPool = ["0", "1A", "2C", "3B", "5C", "6A", "9B", "11A", "11D", "12A", "13B", "16", "17A", "TBC", "Bus"];
+    const platformsPool = ["17A", "TBC", "2C", "9B", "17A", "Bus", "5C", "6A", "11D", "12A", "0", "1B"];
 
     function pad(n) { return n.toString().padStart(2, '0'); }
 
     let allServices = [];
     let lastMinute = -1;
-    let lastStateFlipped = null; // Track flip state to prevent re-rendering every second!
+    let lastStateFlipped = null;
 
     function generateServices() {
       let now = new Date();
@@ -344,20 +345,20 @@
       for (let i = 0; i < 12; i++) {
         let t = new Date(now.getTime() + (i * 4 + 2) * 60000);
         let dest = destinationsPool[i % destinationsPool.length];
-        let plat = platformsPool[Math.floor(Math.random() * platformsPool.length)];
+        let plat = platformsPool[i % platformsPool.length];
 
         let rand = Math.random();
         let status = "On time";
         let statusClass = "status-ontime";
 
-        if (rand < 0.2) {
+        if (rand < 0.25) {
           let expMin = pad((t.getMinutes() + Math.floor(Math.random() * 12) + 3) % 60);
           status = `Exp ${t.getHours()}:${expMin}`;
           statusClass = "status-delayed";
-        } else if (rand < 0.25) {
+        } else if (rand < 0.32) {
           status = "Delayed";
           statusClass = "status-delayed";
-        } else if (rand < 0.28) {
+        } else if (rand < 0.36) {
           status = "Cancelled";
           statusClass = "status-cancelled";
         }
@@ -402,7 +403,7 @@
       if (!next) return;
 
       document.getElementById("next-service-label").innerText = 
-        `Next: ${next.time} ${next.destination} (Plat ${next.platform}) — Formation`;
+        `${next.time} ${next.destination} (PLAT ${next.platform}) — FORMATION`;
 
       let row = document.getElementById("formation-row");
       row.innerHTML = "";
@@ -419,11 +420,9 @@
     function tick() {
       let now = new Date();
 
-      // Clock ticks every second
       document.getElementById("clock-hhmm").innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       document.getElementById("clock-ss").innerText = pad(now.getSeconds());
 
-      // Regenerate dataset when minute rolls over
       let minuteChanged = now.getMinutes() !== lastMinute;
       if (minuteChanged) {
         generateServices();
@@ -431,10 +430,9 @@
         renderFormation();
       }
 
-      // Check if page state flipped (every 15 seconds)
+      // 15-Second Page Turn Cycle
       let isFlipped = Math.floor(now.getSeconds() / 15) % 2 === 1;
 
-      // Render screen items ONLY when state changes or minute changes!
       if (isFlipped !== lastStateFlipped || minuteChanged) {
         lastStateFlipped = isFlipped;
 
