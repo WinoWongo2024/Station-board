@@ -37,16 +37,14 @@
       padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px) 12px;
     }
 
-    /* iPhone 15 Pro Max Container */
     .mobile-container {
       width: 100%;
-      max-width: 430px; /* iPhone 15 Pro Max viewport width */
+      max-width: 430px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    /* Main Concourse Frame */
     .concourse-frame {
       display: flex;
       flex-direction: column;
@@ -59,7 +57,6 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     }
 
-    /* Screen Panels */
     .board-screen {
       background-color: var(--screen-bg);
       border: 1px solid var(--card-border);
@@ -69,7 +66,6 @@
       flex-direction: column;
     }
 
-    /* Board Header */
     .screen-header {
       display: flex;
       justify-content: space-between;
@@ -93,17 +89,16 @@
       color: var(--text-gray);
     }
 
-    /* Departure Rows */
     .dept-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .dept-item {
       display: flex;
       flex-direction: column;
-      padding-bottom: 4px;
+      padding-bottom: 6px;
       border-bottom: 1px dashed #141c28;
     }
 
@@ -149,21 +144,22 @@
     .status-delayed { color: var(--status-delayed); }
     .status-cancelled { color: var(--status-cancelled); }
 
-    /* Continuous Scrolling Marquee for Calling Points */
+    /* Fixed Marquee Track Wrapper */
     .marquee-container {
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
-      margin-top: 2px;
+      margin-top: 3px;
       position: relative;
     }
 
+    /* Stable Continuous Marquee Animation */
     .marquee-text {
       display: inline-block;
       font-size: 0.72rem;
       color: var(--text-gray);
       font-family: ui-monospace, SFMono-Regular, monospace;
-      animation: marquee-scroll 14s linear infinite;
+      animation: smoothMarquee 15s linear infinite;
       padding-left: 100%;
     }
 
@@ -171,12 +167,11 @@
       color: var(--text-yellow);
     }
 
-    @keyframes marquee-scroll {
-      0% { transform: translateX(0%); }
-      100% { transform: translateX(-100%); }
+    @keyframes smoothMarquee {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
     }
 
-    /* Screen 3: Welcome & Clock Panel */
     .welcome-screen {
       display: flex;
       flex-direction: row;
@@ -217,7 +212,6 @@
       color: var(--text-yellow);
     }
 
-    /* Sub-panel for Coach Formation */
     .sub-panel {
       width: 100%;
       background-color: #0c0f14;
@@ -268,32 +262,24 @@
 <body>
 
   <div class="mobile-container">
-    <!-- DEPARTURES BOARD FRAME -->
     <div class="concourse-frame">
       
-      <!-- SCREEN 1: DEPARTURES -->
       <div class="board-screen">
         <div class="screen-header">
           <span class="screen-title">Departures</span>
           <span class="page-tag" id="page1-tag">Page 1 of 2</span>
         </div>
-        <div class="dept-list" id="screen1-list">
-          <!-- Populated dynamically -->
-        </div>
+        <div class="dept-list" id="screen1-list"></div>
       </div>
 
-      <!-- SCREEN 2: DEPARTURES -->
       <div class="board-screen">
         <div class="screen-header">
           <span class="screen-title">Departures</span>
           <span class="page-tag" id="page2-tag">Page 2 of 2</span>
         </div>
-        <div class="dept-list" id="screen2-list">
-          <!-- Populated dynamically -->
-        </div>
+        <div class="dept-list" id="screen2-list"></div>
       </div>
 
-      <!-- SCREEN 3: WELCOME & REAL-TIME CLOCK -->
       <div class="board-screen welcome-screen">
         <div class="welcome-text">
           Welcome<br>to Leeds
@@ -307,12 +293,9 @@
 
     </div>
 
-    <!-- COACH FORMATION SUB-PANEL -->
     <div class="sub-panel">
       <div class="sub-panel-title" id="next-service-label">Next Service Coach Formation</div>
-      <div class="formation-row" id="formation-row">
-        <!-- Rendered dynamically -->
-      </div>
+      <div class="formation-row" id="formation-row"></div>
     </div>
   </div>
 
@@ -425,18 +408,16 @@
     function tick() {
       let now = new Date();
 
-      // Live Clock
       document.getElementById("clock-hhmm").innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       document.getElementById("clock-ss").innerText = pad(now.getSeconds());
 
-      // Regenerate dataset every minute
       if (now.getMinutes() !== lastMinute) {
         generateServices();
         lastMinute = now.getMinutes();
       }
 
-      // Page rotation every 8 seconds
-      let isFlipped = Math.floor(now.getSeconds() / 8) % 2 === 1;
+      // Page rotation updated to 15 seconds per page
+      let isFlipped = Math.floor(now.getSeconds() / 15) % 2 === 1;
 
       if (!isFlipped) {
         renderScreen("screen1-list", allServices.slice(0, 4));
