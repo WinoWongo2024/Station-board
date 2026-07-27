@@ -3,259 +3,381 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leeds Station Live Departures</title>
+  <title>Leeds Station - Live Departures</title>
   <style>
     :root {
-      --bg-color: #0d0d0d;
-      --card-bg: #101010;
-      --led-yellow: #FFD700;
-      --led-green: #00FF00;
-      --led-orange: #FFA500;
-      --border-color: #222;
-      --font-family: 'Courier New', Courier, Menlo, monospace;
+      --bg-color: #080b10;
+      --panel-bg: #0d131f;
+      --border-color: #1e293b;
+      --text-amber: #ffaa00;
+      --text-white: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #0284c7;
+      --status-green: #22c55e;
+      --status-red: #ef4444;
+      --status-amber: #f59e0b;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       background-color: var(--bg-color);
-      color: var(--led-green);
-      font-family: var(--font-family);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      color: var(--text-white);
       min-height: 100vh;
-      padding: 20px;
-    }
-
-    .board-container {
-      background-color: var(--card-bg);
-      border: 3px solid #1a1a1a;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
-      padding: 24px;
-      width: 100%;
-      max-width: 800px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
 
-    .header-title {
-      color: var(--led-yellow);
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 12px;
-    }
-
-    .board-table {
+    .station-board {
       width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    .board-table th {
-      color: #777;
-      font-size: 0.85rem;
-      text-align: left;
-      padding-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .board-table td {
-      padding: 10px 4px;
-      font-size: 1rem;
-      white-space: nowrap;
+      max-width: 1000px;
+      background-color: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
       overflow: hidden;
-      text-overflow: ellipsis;
-      vertical-align: middle;
     }
 
-    .time-col { width: 15%; color: var(--led-green); }
-    .dest-col { width: 45%; color: var(--led-green); font-weight: bold; }
-    .plat-col { width: 15%; color: var(--led-green); }
-    .status-col { width: 25%; }
-
-    .status-ontime {
-      color: var(--led-green);
-    }
-
-    .status-delayed {
-      color: var(--led-orange);
-    }
-
-    .exp-time {
-      font-size: 0.8rem;
-      color: var(--led-orange);
-      display: block;
-    }
-
-    .footer {
-      border-top: 1px solid var(--border-color);
-      padding-top: 12px;
+    /* Header Styling */
+    .board-header {
+      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .station-branding h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-white);
+      text-transform: uppercase;
+    }
+
+    .station-branding p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .live-clock {
+      font-family: monospace;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-amber);
+      background: #020617;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      letter-spacing: 1px;
+    }
+
+    /* Table Layout */
+    .train-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .train-table th {
+      background-color: #0b1120;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .train-row {
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s ease;
+    }
+
+    .train-row:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .train-row td {
+      padding: 16px;
+      vertical-align: middle;
+    }
+
+    /* Column Specifics */
+    .col-time {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-white);
+      width: 12%;
+    }
+
+    .col-dest {
+      width: 38%;
+    }
+
+    .dest-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-white);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .calling-points {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 340px;
+    }
+
+    .col-plat {
+      width: 15%;
+    }
+
+    .platform-badge {
+      display: inline-block;
+      background-color: #1e293b;
+      color: var(--text-white);
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid #334155;
+    }
+
+    .col-operator {
+      width: 15%;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .col-status {
+      width: 20%;
+      text-align: right;
+    }
+
+    .status-pill {
+      display: inline-block;
       font-size: 0.85rem;
-      color: var(--led-yellow);
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
     }
 
-    /* Subtle CRT screen glow effect */
-    .glow-effect {
-      text-shadow: 0 0 3px currentColor;
+    .status-on-time {
+      color: var(--status-green);
+      background-color: rgba(34, 197, 94, 0.1);
     }
 
-    @media (max-width: 600px) {
-      .board-container {
-        padding: 16px;
-      }
-      .header-title {
-        font-size: 1.2rem;
-      }
-      .board-table td, .board-table th {
-        font-size: 0.85rem;
-      }
-      .exp-time {
-        font-size: 0.7rem;
-      }
+    .status-delayed {
+      color: var(--status-amber);
+      background-color: rgba(245, 158, 11, 0.1);
+    }
+
+    .exp-time {
+      font-size: 0.75rem;
+      color: var(--status-amber);
+      margin-top: 2px;
+      display: block;
+      font-family: monospace;
+    }
+
+    /* Footer Pagination and Info */
+    .board-footer {
+      background-color: #0b1120;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 2px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pagination-indicator {
+      font-weight: 600;
+      color: var(--text-amber);
+      font-family: monospace;
+    }
+
+    /* Responsive scaling for mobile */
+    @media (max-width: 768px) {
+      .station-board { border: none; border-radius: 0; }
+      .calling-points { display: none; }
+      .col-operator { display: none; }
+      .col-time { width: 20%; }
+      .col-dest { width: 50%; }
+      .col-plat { width: 30%; }
+      .col-status { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div class="board-container glow-effect">
-    <div class="header-title" id="station-title">LEEDS STATION</div>
+  <div class="station-board">
+    <!-- Header -->
+    <div class="board-header">
+      <div class="station-branding">
+        <h1>Leeds Station [LDS]</h1>
+        <p>Live Departures Board</p>
+      </div>
+      <div class="live-clock" id="live-clock">00:00:00</div>
+    </div>
 
-    <table class="board-table">
+    <!-- Departure Table -->
+    <table class="train-table">
       <thead>
         <tr>
-          <th style="width: 15%;">Time</th>
-          <th style="width: 45%;">Destination</th>
-          <th style="width: 15%;">Plat</th>
-          <th style="width: 25%;">Status</th>
+          <th>Time</th>
+          <th>Destination</th>
+          <th>Platform</th>
+          <th>Operator</th>
+          <th style="text-align: right;">Status</th>
         </tr>
-      </thead>
-      <tbody id="train-rows">
-        <!-- Rows rendered by JS -->
+      </i>
+      <tbody id="train-tbody">
+        <!-- Rendered dynamically -->
       </tbody>
     </table>
 
-    <div class="footer">
-      <span id="page-indicator">Page 1 of 3</span>
-      <span id="last-updated">Last updated: 00:00</span>
+    <!-- Footer -->
+    <div class="board-footer">
+      <span id="footer-update">Syncing real-time feed...</span>
+      <span class="pagination-indicator" id="page-indicator">Page 1 of 3</span>
     </div>
   </div>
 
   <script>
-    // Mock Destinations
     const destinations = [
-      // Original List
-      "Harrogate", "London King's Cross", "York", "Edinburgh", "Manchester", "Newcastle",
-      // Yorkshire & Local Commuter
+      "Harrogate", "London King's Cross", "York", "Edinburgh", "Manchester Victoria", "Newcastle",
       "Bradford Interchange", "Bradford Forster Square", "Ilkley", "Skipton", "Knaresborough",
-      "Halifax", "Huddersfield", "Wakefield Westgate", "Wakefield Kirkgate", "Sheffield",
-      "Doncaster", "Hull", "Scarborough", "Whitby", "Bridlington", "Hebden Bridge",
-      // Major Cities & Intercity
-      "Birmingham New Street", "Bristol Temple Meads", "Liverpool Lime Street", "Glasgow Central",
-      "Nottingham", "Derby", "Leicester", "Carlisle", "Durham", "Darlington", "Chester",
-      // TransPennine & Regional
-      "Preston", "Lancaster", "Blackpool North", "Morecambe", "Settle"
+      "Halifax", "Huddersfield", "Wakefield Westgate", "Sheffield", "Doncaster", "Hull", 
+      "Scarborough", "Whitby", "Birmingham New Street", "Liverpool Lime Street", "Glasgow Central",
+      "Nottingham", "Carlisle", "Durham", "Darlington", "Chester", "Blackpool North", "Settle"
     ];
 
-    // Platforms
     const platforms = [
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-      "0A", "0B", "1A", "1B", "1C", "1D", "2A", "2B", "2C", "3A", "3B", "3C",
-      "4A", "4B", "4C", "5A", "5B", "6A", "6B", "8A", "8B", "9A", "9B",
-      "11A", "11B", "12A", "12B", "15A", "15B", "16A", "16B"
+      "0A", "0B", "1A", "1B", "1C", "1D", "2A", "3A", "3B", "4A", "5B", "6A", "10A", "11D", "12C", "15"
     ];
 
-    function formatTime(date) {
-      let hours = date.getHours().toString().padStart(2, "0");
-      let minutes = date.getMinutes().toString().padStart(2, "0");
-      return `${hours}:${minutes}`;
-    }
+    const operators = ["Northern", "LNER", "TransPennine Express", "CrossCountry", "East Midlands Railway"];
 
-    function addMinutes(date, minutes) {
-      return new Date(date.getTime() + minutes * 60000);
-    }
+    const sampleCallingPoints = {
+      "Harrogate": ["Burley Park", "Headingley", "Horsforth", "Pannal"],
+      "London King's Cross": ["Wakefield Westgate", "Doncaster", "Newark North Gate", "Stevenage"],
+      "Edinburgh": ["York", "Darlington", "Durham", "Newcastle", "Alnmouth"],
+      "Manchester Victoria": ["Bramley", "New Pudsey", "Bradford Int", "Halifax", "Hebden Bridge"],
+      "York": ["Garforth", "Micklefield", "Selby"],
+      "Skipton": ["Kirkstall Forge", "Shipley", "Bingley", "Keighley"]
+    };
 
     let trains = [];
-    let lastGeneratedMinute = -1;
+    let lastMinute = -1;
 
-    // Generate schedule relative to current time
-    function generateTrainData() {
+    function formatDigits(num) {
+      return num.toString().padStart(2, "0");
+    }
+
+    function generateSchedule() {
       let now = new Date();
       trains = [];
+      // Generate 9 trains tracking around current time (-4 to +4 blocks)
       for (let i = -4; i <= 4; i++) {
-        let time = new Date(now.getTime() + i * 5 * 60000);
-        let isDelayed = i < 0;
+        let t = new Date(now.getTime() + i * 4 * 60000);
+        let dest = destinations[Math.floor(Math.random() * destinations.length)];
+        let isDelayed = i < 0 && Math.random() > 0.5;
+        
+        let expTime = new Date(t.getTime());
+        if (isDelayed) expTime.setMinutes(expTime.getMinutes() + Math.floor(Math.random() * 15) + 5);
+
         trains.push({
-          time: formatTime(time),
-          destination: destinations[Math.floor(Math.random() * destinations.length)],
+          time: `${formatDigits(t.getHours())}:${formatDigits(t.getMinutes())}`,
+          destination: dest,
           platform: platforms[Math.floor(Math.random() * platforms.length)],
+          operator: operators[Math.floor(Math.random() * operators.length)],
           status: isDelayed ? "Delayed" : "On time",
-          expectedArrival: isDelayed ? formatTime(addMinutes(time, 20)) : null
+          expected: isDelayed ? `${formatDigits(expTime.getHours())}:${formatDigits(expTime.getMinutes())}` : null,
+          stops: sampleCallingPoints[dest] || ["Leeds", "Local Stops", "Destination Final"]
         });
       }
     }
 
-    function updateBoard() {
+    function updateApp() {
       let now = new Date();
+      
+      // Update the 1-second precision digital clock header
+      document.getElementById("live-clock").innerText = 
+        `${formatDigits(now.getHours())}:${formatDigits(now.getMinutes())}:${formatDigits(now.getSeconds())}`;
 
-      // Regenerate mock data every minute
-      if (now.getMinutes() !== lastGeneratedMinute) {
-        generateTrainData();
-        lastGeneratedMinute = now.getMinutes();
+      // Re-generate pool data once every minute change
+      if (now.getMinutes() !== lastMinute) {
+        generateSchedule();
+        lastMinute = now.getMinutes();
       }
 
-      let trainsPerPage = 3;
-      let totalPages = Math.ceil(trains.length / trainsPerPage);
-      
-      // Page rotation every 5 seconds
-      let currentPage = Math.floor((now.getSeconds() / 5) % totalPages);
+      // Pagination calculation: changes page every 6 seconds across total items
+      let pageSize = 3;
+      let totalPages = Math.ceil(trains.length / pageSize);
+      let currentPage = Math.floor((now.getSeconds() / 6) % totalPages);
 
-      let startIdx = currentPage * trainsPerPage;
-      let endIdx = Math.min(startIdx + trainsPerPage, trains.length);
-      let pageTrains = trains.slice(startIdx, endIdx);
+      let start = currentPage * pageSize;
+      let pageItems = trains.slice(start, start + pageSize);
 
-      // Render table rows
-      let tbody = document.getElementById("train-rows");
+      let tbody = document.getElementById("train-tbody");
       tbody.innerHTML = "";
 
-      pageTrains.forEach(train => {
+      pageItems.forEach(train => {
         let tr = document.createElement("tr");
+        tr.className = "train-row";
 
         let statusHTML = train.status === "On time"
-          ? `<span class="status-ontime">On time</span>`
-          : `<span class="status-delayed">Delayed</span><span class="exp-time">Exp: ${train.expectedArrival}</span>`;
+          ? `<span class="status-pill status-on-time">On time</span>`
+          : `<span class="status-pill status-delayed">Delayed</span><span class="exp-time">Exp ${train.expected}</span>`;
+
+        let callingText = `Stops at: ${train.stops.join(", ")}`;
 
         tr.innerHTML = `
-          <td class="time-col">${train.time}</td>
-          <td class="dest-col">${train.destination.toUpperCase()}</td>
-          <td class="plat-col">${train.platform}</td>
-          <td class="status-col">${statusHTML}</td>
+          <td class="col-time">${train.time}</td>
+          <td class="col-dest">
+            <div class="dest-name">${train.destination}</div>
+            <div class="calling-points">${callingText}</div>
+          </td>
+          <td class="col-plat"><span class="platform-badge">${train.platform}</span></td>
+          <td class="col-operator">${train.operator}</td>
+          <td class="col-status">${statusHTML}</td>
         `;
         tbody.appendChild(tr);
       });
 
-      // Update indicators
       document.getElementById("page-indicator").innerText = `Page ${currentPage + 1} of ${totalPages}`;
-      document.getElementById("last-updated").innerText = `Last updated: ${formatTime(now)}`;
+      document.getElementById("footer-update").innerText = `System Active — Auto-Refreshing Live`;
     }
 
-    // Initial load & continuous live update loop
-    generateTrainData();
-    updateBoard();
-    setInterval(updateBoard, 1000);
+    // Initialize immediately then tick every single second
+    generateSchedule();
+    updateApp();
+    setInterval(updateApp, 1000);
   </script>
 </body>
 </html>
