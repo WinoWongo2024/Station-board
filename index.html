@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leeds Station Live Departures</title>
+  <style>
+    :root {
+      --bg-color: #0d0d0d;
+      --card-bg: #101010;
+      --led-yellow: #FFD700;
+      --led-green: #00FF00;
+      --led-orange: #FFA500;
+      --border-color: #222;
+      --font-family: 'Courier New', Courier, Menlo, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--led-green);
+      font-family: var(--font-family);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .board-container {
+      background-color: var(--card-bg);
+      border: 3px solid #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
+      padding: 24px;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header-title {
+      color: var(--led-yellow);
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .board-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .board-table th {
+      color: #777;
+      font-size: 0.85rem;
+      text-align: left;
+      padding-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .board-table td {
+      padding: 10px 4px;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+    }
+
+    .time-col { width: 15%; color: var(--led-green); }
+    .dest-col { width: 45%; color: var(--led-green); font-weight: bold; }
+    .plat-col { width: 15%; color: var(--led-green); }
+    .status-col { width: 25%; }
+
+    .status-ontime {
+      color: var(--led-green);
+    }
+
+    .status-delayed {
+      color: var(--led-orange);
+    }
+
+    .exp-time {
+      font-size: 0.8rem;
+      color: var(--led-orange);
+      display: block;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--led-yellow);
+    }
+
+    /* Subtle CRT screen glow effect */
+    .glow-effect {
+      text-shadow: 0 0 3px currentColor;
+    }
+
+    @media (max-width: 600px) {
+      .board-container {
+        padding: 16px;
+      }
+      .header-title {
+        font-size: 1.2rem;
+      }
+      .board-table td, .board-table th {
+        font-size: 0.85rem;
+      }
+      .exp-time {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="board-container glow-effect">
+    <div class="header-title" id="station-title">LEEDS STATION</div>
+
+    <table class="board-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Time</th>
+          <th style="width: 45%;">Destination</th>
+          <th style="width: 15%;">Plat</th>
+          <th style="width: 25%;">Status</th>
+        </tr>
+      </thead>
+      <tbody id="train-rows">
+        <!-- Rows rendered by JS -->
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span id="page-indicator">Page 1 of 3</span>
+      <span id="last-updated">Last updated: 00:00</span>
+    </div>
+  </div>
+
+  <script>
+    // Mock Destinations
+    const destinations = [
+      // Original List
+      "Harrogate", "London King's Cross", "York", "Edinburgh", "Manchester", "Newcastle",
+      // Yorkshire & Local Commuter
+      "Bradford Interchange", "Bradford Forster Square", "Ilkley", "Skipton", "Knaresborough",
+      "Halifax", "Huddersfield", "Wakefield Westgate", "Wakefield Kirkgate", "Sheffield",
+      "Doncaster", "Hull", "Scarborough", "Whitby", "Bridlington", "Hebden Bridge",
+      // Major Cities & Intercity
+      "Birmingham New Street", "Bristol Temple Meads", "Liverpool Lime Street", "Glasgow Central",
+      "Nottingham", "Derby", "Leicester", "Carlisle", "Durham", "Darlington", "Chester",
+      // TransPennine & Regional
+      "Preston", "Lancaster", "Blackpool North", "Morecambe", "Settle"
+    ];
+
+    // Platforms
+    const platforms = [
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+      "0A", "0B", "1A", "1B", "1C", "1D", "2A", "2B", "2C", "3A", "3B", "3C",
+      "4A", "4B", "4C", "5A", "5B", "6A", "6B", "8A", "8B", "9A", "9B",
+      "11A", "11B", "12A", "12B", "15A", "15B", "16A", "16B"
+    ];
+
+    function formatTime(date) {
+      let hours = date.getHours().toString().padStart(2, "0");
+      let minutes = date.getMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+
+    function addMinutes(date, minutes) {
+      return new Date(date.getTime() + minutes * 60000);
+    }
+
+    let trains = [];
+    let lastGeneratedMinute = -1;
+
+    // Generate schedule relative to current time
+    function generateTrainData() {
+      let now = new Date();
+      trains = [];
+      for (let i = -4; i <= 4; i++) {
+        let time = new Date(now.getTime() + i * 5 * 60000);
+        let isDelayed = i < 0;
+        trains.push({
+          time: formatTime(time),
+          destination: destinations[Math.floor(Math.random() * destinations.length)],
+          platform: platforms[Math.floor(Math.random() * platforms.length)],
+          status: isDelayed ? "Delayed" : "On time",
+          expectedArrival: isDelayed ? formatTime(addMinutes(time, 20)) : null
+        });
+      }
+    }
+
+    function updateBoard() {
+      let now = new Date();
+
+      // Regenerate mock data every minute
+      if (now.getMinutes() !== lastGeneratedMinute) {
+        generateTrainData();
+        lastGeneratedMinute = now.getMinutes();
+      }
+
+      let trainsPerPage = 3;
+      let totalPages = Math.ceil(trains.length / trainsPerPage);
+      
+      // Page rotation every 5 seconds
+      let currentPage = Math.floor((now.getSeconds() / 5) % totalPages);
+
+      let startIdx = currentPage * trainsPerPage;
+      let endIdx = Math.min(startIdx + trainsPerPage, trains.length);
+      let pageTrains = trains.slice(startIdx, endIdx);
+
+      // Render table rows
+      let tbody = document.getElementById("train-rows");
+      tbody.innerHTML = "";
+
+      pageTrains.forEach(train => {
+        let tr = document.createElement("tr");
+
+        let statusHTML = train.status === "On time"
+          ? `<span class="status-ontime">On time</span>`
+          : `<span class="status-delayed">Delayed</span><span class="exp-time">Exp: ${train.expectedArrival}</span>`;
+
+        tr.innerHTML = `
+          <td class="time-col">${train.time}</td>
+          <td class="dest-col">${train.destination.toUpperCase()}</td>
+          <td class="plat-col">${train.platform}</td>
+          <td class="status-col">${statusHTML}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Update indicators
+      document.getElementById("page-indicator").innerText = `Page ${currentPage + 1} of ${totalPages}`;
+      document.getElementById("last-updated").innerText = `Last updated: ${formatTime(now)}`;
+    }
+
+    // Initial load & continuous live update loop
+    generateTrainData();
+    updateBoard();
+    setInterval(updateBoard, 1000);
+  </script>
+</body>
+</html>
