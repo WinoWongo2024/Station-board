@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leeds Station - Concourse Board Display</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Leeds Station - Concourse Display</title>
   <style>
     :root {
+      --bg-black: #000000;
       --screen-bg: #030508;
       --card-border: #1a2332;
       --text-white: #ffffff;
-      --text-gray: #a0aab8;
+      --text-gray: #94a3b8;
       --text-yellow: #ffcc00;
       --status-ontime: #ffffff;
       --status-delayed: #ffcc00;
       --status-cancelled: #ff4d4d;
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     }
 
     * {
@@ -22,42 +23,50 @@
       margin: 0;
       padding: 0;
       font-family: var(--font-family);
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: #000000;
+      background-color: var(--bg-black);
       color: var(--text-white);
       min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      padding: 20px;
+      justify-content: flex-start;
+      padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 12px) 12px;
     }
 
-    /* 3-Panel Concourse Physical Board Frame */
-    .concourse-frame {
-      display: grid;
-      grid-template-columns: 1fr 1fr 0.7fr;
-      gap: 12px;
+    /* iPhone 15 Pro Max Container */
+    .mobile-container {
       width: 100%;
-      max-width: 1400px;
-      background-color: #0c0f14;
-      padding: 16px;
-      border: 4px solid #1c2430;
-      border-radius: 8px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
-    }
-
-    /* Screens Base Styling */
-    .board-screen {
-      background-color: var(--screen-bg);
-      border: 2px solid var(--card-border);
-      border-radius: 4px;
-      padding: 16px;
+      max-width: 430px; /* iPhone 15 Pro Max viewport width */
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      min-height: 620px;
+      gap: 12px;
+    }
+
+    /* Main Concourse Frame */
+    .concourse-frame {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      background-color: #0c0f14;
+      padding: 10px;
+      border: 2px solid #1c2430;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Screen Panels */
+    .board-screen {
+      background-color: var(--screen-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Board Header */
@@ -65,70 +74,74 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #222d3d;
-      padding-bottom: 8px;
-      margin-bottom: 8px;
+      border-bottom: 1px solid #222d3d;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .screen-title {
-      font-size: 1.25rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-white);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .page-tag {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--text-white);
+      color: var(--text-gray);
     }
 
-    /* Departure Tables */
+    /* Departure Rows */
     .dept-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      flex-grow: 1;
     }
 
     .dept-item {
       display: flex;
       flex-direction: column;
-      padding: 4px 0;
+      padding-bottom: 4px;
       border-bottom: 1px dashed #141c28;
     }
 
     .dept-main-row {
       display: grid;
-      grid-template-columns: 60px 1fr 50px 85px;
+      grid-template-columns: 46px 1fr 34px 70px;
       align-items: baseline;
-      gap: 8px;
+      gap: 6px;
     }
 
     .dept-time {
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 0.9rem;
       color: var(--text-white);
+      font-family: ui-monospace, SFMono-Regular, monospace;
     }
 
     .dept-dest {
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       color: var(--text-white);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-transform: uppercase;
     }
 
     .dept-plat {
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.85rem;
       color: var(--text-white);
       text-align: center;
+      font-family: ui-monospace, SFMono-Regular, monospace;
     }
 
     .dept-status {
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.8rem;
       text-align: right;
     }
 
@@ -136,146 +149,154 @@
     .status-delayed { color: var(--status-delayed); }
     .status-cancelled { color: var(--status-cancelled); }
 
-    /* Secondary Line (via / notice) */
-    .dept-sub-row {
-      font-size: 0.8rem;
+    /* Continuous Scrolling Marquee for Calling Points */
+    .marquee-container {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-top: 2px;
+      position: relative;
+    }
+
+    .marquee-text {
+      display: inline-block;
+      font-size: 0.72rem;
       color: var(--text-gray);
-      margin-left: 60px;
-      margin-top: 1px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      animation: marquee-scroll 14s linear infinite;
+      padding-left: 100%;
     }
 
-    .dept-notice {
+    .marquee-text.notice {
       color: var(--text-yellow);
-      font-size: 0.78rem;
     }
 
-    /* Screen 3: Welcome & Clock Screen */
+    @keyframes marquee-scroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* Screen 3: Welcome & Clock Panel */
     .welcome-screen {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      text-align: center;
-      padding: 40px 16px 20px 16px;
+      padding: 12px 16px;
+      background: linear-gradient(180deg, #05080e 0%, #030508 100%);
     }
 
     .welcome-text {
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1.25;
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.1;
       color: var(--text-white);
-      margin-top: 60px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* Specific Clock Layout: Huge HH:MM, small ss */
     .clock-box {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: ui-monospace, SFMono-Regular, monospace;
       color: var(--text-white);
       display: flex;
       align-items: baseline;
-      justify-content: center;
-      margin-bottom: 20px;
     }
 
     .clock-hhmm {
-      font-size: 5rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      letter-spacing: -2px;
+      letter-spacing: -1px;
       line-height: 1;
     }
 
     .clock-ss {
-      font-size: 2.6rem;
+      font-size: 1.1rem;
       font-weight: 700;
       line-height: 1;
-      margin-left: 2px;
+      margin-left: 1px;
+      color: var(--text-yellow);
     }
 
-    /* Sub-board panel for Coach formation under frame */
+    /* Sub-panel for Coach Formation */
     .sub-panel {
       width: 100%;
-      max-width: 1400px;
       background-color: #0c0f14;
-      border: 2px solid #1c2430;
-      border-radius: 8px;
-      margin-top: 16px;
-      padding: 16px 24px;
+      border: 1px solid #1c2430;
+      border-radius: 10px;
+      padding: 10px 12px;
     }
 
     .sub-panel-title {
       color: var(--text-yellow);
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .formation-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       overflow-x: auto;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
     }
 
     .coach-box {
       background-color: #1a2332;
       border: 1px solid #2d3b52;
-      padding: 6px 12px;
+      padding: 4px 8px;
       border-radius: 4px;
       text-align: center;
       font-weight: bold;
-      font-size: 0.85rem;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .coach-box.first {
       background-color: #854d0e;
       border-color: #a16207;
     }
-
-    @media (max-width: 1024px) {
-      .concourse-frame {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div style="display:flex; flex-direction:column; align-items:center; width:100%;">
-    <!-- 3-PANEL PHYSICAL BOARD SETUP -->
+  <div class="mobile-container">
+    <!-- DEPARTURES BOARD FRAME -->
     <div class="concourse-frame">
       
-      <!-- SCREEN 1: DEPARTURES (PAGE 1 OF 2) -->
+      <!-- SCREEN 1: DEPARTURES -->
       <div class="board-screen">
-        <div>
-          <div class="screen-header">
-            <span class="screen-title">Departures</span>
-            <span class="page-tag" id="page1-tag">Page 1 of 2</span>
-          </div>
-          <div class="dept-list" id="screen1-list">
-            <!-- Populated dynamically -->
-          </div>
+        <div class="screen-header">
+          <span class="screen-title">Departures</span>
+          <span class="page-tag" id="page1-tag">Page 1 of 2</span>
+        </div>
+        <div class="dept-list" id="screen1-list">
+          <!-- Populated dynamically -->
         </div>
       </div>
 
-      <!-- SCREEN 2: DEPARTURES (PAGE 2 OF 2) -->
+      <!-- SCREEN 2: DEPARTURES -->
       <div class="board-screen">
-        <div>
-          <div class="screen-header">
-            <span class="screen-title">Departures</span>
-            <span class="page-tag" id="page2-tag">Page 2 of 2</span>
-          </div>
-          <div class="dept-list" id="screen2-list">
-            <!-- Populated dynamically -->
-          </div>
+        <div class="screen-header">
+          <span class="screen-title">Departures</span>
+          <span class="page-tag" id="page2-tag">Page 2 of 2</span>
+        </div>
+        <div class="dept-list" id="screen2-list">
+          <!-- Populated dynamically -->
         </div>
       </div>
 
       <!-- SCREEN 3: WELCOME & REAL-TIME CLOCK -->
       <div class="board-screen welcome-screen">
         <div class="welcome-text">
-          Welcome<br>to<br>Leeds
+          Welcome<br>to Leeds
         </div>
 
         <div class="clock-box">
@@ -286,7 +307,7 @@
 
     </div>
 
-    <!-- NEXT SERVICE COACH FORMATION -->
+    <!-- COACH FORMATION SUB-PANEL -->
     <div class="sub-panel">
       <div class="sub-panel-title" id="next-service-label">Next Service Coach Formation</div>
       <div class="formation-row" id="formation-row">
@@ -297,25 +318,22 @@
 
   <script>
     const destinationsPool = [
-      { name: "Chester", via: "via Halifax" },
-      { name: "Hull", via: "" },
-      { name: "Ilkley", via: "" },
-      { name: "Plymouth", via: "via Sheffield" },
-      { name: "Bradford F Sq", via: "" },
-      { name: "Manchester Vic", via: "via Halifax" },
-      { name: "Redcar Central", via: "via Middlesbrough" },
-      { name: "London Kings X", via: "", notice: "Reserve seats up to 5 minutes before departure at LNER.co.uk" },
-      { name: "Liverpool L St", via: "via Manchester Vic" },
-      { name: "York", via: "" },
-      { name: "Wigan Wallgate", via: "via Halifax" },
-      { name: "Morecambe", via: "via Lancaster" },
-      { name: "Halifax", via: "via Dewsbury", notice: "Bus replacement will depart from Wellington Street" },
-      { name: "Doncaster", via: "" },
-      { name: "Skipton", via: "" },
-      { name: "Knaresborough", via: "via Harrogate" },
-      { name: "Poppleton", via: "via Harrogate" },
-      { name: "Knottingley", via: "via Wakefield Westgate" },
-      { name: "Sheffield", via: "via Castleford" }
+      { name: "Chester", stops: "Calling at: Bramley, New Pudsey, Bradford Interchange, Halifax, Chester" },
+      { name: "Hull", stops: "Calling at: Cross Gates, Garforth, Selby, Brough, Hull" },
+      { name: "Ilkley", stops: "Calling at: Kirkstall Forge, Guiseley, Menston, Burley-in-Wharfedale, Ilkley" },
+      { name: "Plymouth", stops: "Calling at: Wakefield Westgate, Sheffield, Derby, Birmingham New Street, Bristol Temple Meads, Plymouth" },
+      { name: "Bradford F Sq", stops: "Calling at: Shipley, Frizinghall, Bradford Forster Square" },
+      { name: "Manchester Vic", stops: "Calling at: Pudsey, Bradford, Halifax, Hebden Bridge, Todmorden, Manchester Victoria" },
+      { name: "Redcar Central", stops: "Calling at: York, Thirsk, Northallerton, Middlesbrough, Redcar Central" },
+      { name: "London Kings X", stops: "Calling at: Wakefield Westgate, Doncaster, Peterborough, London King's Cross • Reserve seats at LNER.co.uk", notice: true },
+      { name: "Liverpool L St", stops: "Calling at: Huddersfield, Stalybridge, Manchester Victoria, Liverpool Lime Street" },
+      { name: "York", stops: "Calling at: Cross Gates, Garforth, Micklefield, Church Fenton, York" },
+      { name: "Wigan Wallgate", stops: "Calling at: Halifax, Todmorden, Rochdale, Manchester, Wigan Wallgate" },
+      { name: "Morecambe", stops: "Calling at: Shipley, Bingley, Keighley, Skipton, Lancaster, Morecambe" },
+      { name: "Halifax", stops: "Bus replacement will depart from Wellington Street for all intermediate stops", notice: true },
+      { name: "Doncaster", stops: "Calling at: Outwood, Wakefield Kirkgate, Fitzwilliam, Doncaster" },
+      { name: "Skipton", stops: "Calling at: Kirkstall Forge, Shipley, Bingley, Keighley, Skipton" },
+      { name: "Knaresborough", stops: "Calling at: Burley Park, Headingley, Horsforth, Pannal, Harrogate, Knaresborough" }
     ];
 
     const platformsPool = ["0", "1A", "2C", "3B", "5C", "6A", "9B", "11A", "11D", "12A", "13B", "16", "17A", "TBC", "Bus"];
@@ -329,8 +347,8 @@
       let now = new Date();
       allServices = [];
 
-      for (let i = 0; i < 20; i++) {
-        let t = new Date(now.getTime() + (i * 3 + 2) * 60000);
+      for (let i = 0; i < 12; i++) {
+        let t = new Date(now.getTime() + (i * 4 + 2) * 60000);
         let dest = destinationsPool[i % destinationsPool.length];
         let plat = platformsPool[Math.floor(Math.random() * platformsPool.length)];
 
@@ -339,7 +357,7 @@
         let statusClass = "status-ontime";
 
         if (rand < 0.2) {
-          let expMin = pad((t.getMinutes() + Math.floor(Math.random() * 15) + 3) % 60);
+          let expMin = pad((t.getMinutes() + Math.floor(Math.random() * 12) + 3) % 60);
           status = `Exp ${t.getHours()}:${expMin}`;
           statusClass = "status-delayed";
         } else if (rand < 0.25) {
@@ -353,8 +371,8 @@
         allServices.push({
           time: `${pad(t.getHours())}:${pad(t.getMinutes())}`,
           destination: dest.name,
-          via: dest.via,
-          notice: dest.notice || "",
+          stops: dest.stops,
+          isNotice: dest.notice || false,
           platform: plat,
           status: status,
           statusClass: statusClass
@@ -370,13 +388,6 @@
         let div = document.createElement("div");
         div.className = "dept-item";
 
-        let subContent = "";
-        if (item.notice) {
-          subContent = `<div class="dept-sub-row dept-notice">${item.notice}</div>`;
-        } else if (item.via) {
-          subContent = `<div class="dept-sub-row">${item.via}</div>`;
-        }
-
         div.innerHTML = `
           <div class="dept-main-row">
             <span class="dept-time">${item.time}</span>
@@ -384,7 +395,9 @@
             <span class="dept-plat">${item.platform}</span>
             <span class="dept-status ${item.statusClass}">${item.status}</span>
           </div>
-          ${subContent}
+          <div class="marquee-container">
+            <span class="marquee-text ${item.isNotice ? 'notice' : ''}">${item.stops}</span>
+          </div>
         `;
         container.appendChild(div);
       });
@@ -395,12 +408,12 @@
       if (!next) return;
 
       document.getElementById("next-service-label").innerText = 
-        `Next Departure: ${next.time} ${next.destination} (Plat ${next.platform}) — Coach Formation`;
+        `Next: ${next.time} ${next.destination} (Plat ${next.platform}) — Formation`;
 
       let row = document.getElementById("formation-row");
       row.innerHTML = "";
 
-      let coaches = ["Loco", "Coach A (1st)", "Coach B", "Coach C", "Coach D", "Coach E", "Coach F"];
+      let coaches = ["Loco", "Coach A (1st)", "Coach B", "Coach C", "Coach D", "Coach E"];
       coaches.forEach((c, idx) => {
         let box = document.createElement("div");
         box.className = `coach-box ${idx === 1 ? "first" : ""}`;
@@ -412,27 +425,27 @@
     function tick() {
       let now = new Date();
 
-      // Update Screen 3 Live Clock (Huge HH:MM, smaller ss)
+      // Live Clock
       document.getElementById("clock-hhmm").innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       document.getElementById("clock-ss").innerText = pad(now.getSeconds());
 
-      // Regenerate dataset on minute change
+      // Regenerate dataset every minute
       if (now.getMinutes() !== lastMinute) {
         generateServices();
         lastMinute = now.getMinutes();
       }
 
-      // Page flipping rotation every 8 seconds across the screens
+      // Page rotation every 8 seconds
       let isFlipped = Math.floor(now.getSeconds() / 8) % 2 === 1;
 
       if (!isFlipped) {
-        renderScreen("screen1-list", allServices.slice(0, 9));
-        renderScreen("screen2-list", allServices.slice(9, 18));
+        renderScreen("screen1-list", allServices.slice(0, 4));
+        renderScreen("screen2-list", allServices.slice(4, 8));
         document.getElementById("page1-tag").innerText = "Page 1 of 2";
         document.getElementById("page2-tag").innerText = "Page 2 of 2";
       } else {
-        renderScreen("screen1-list", allServices.slice(2, 11));
-        renderScreen("screen2-list", allServices.slice(11, 20));
+        renderScreen("screen1-list", allServices.slice(2, 6));
+        renderScreen("screen2-list", allServices.slice(6, 10));
         document.getElementById("page1-tag").innerText = "Page 2 of 2";
         document.getElementById("page2-tag").innerText = "Page 1 of 2";
       }
@@ -440,7 +453,6 @@
       renderFormation();
     }
 
-    // Run immediately then tick every second
     generateServices();
     tick();
     setInterval(tick, 1000);
