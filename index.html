@@ -98,14 +98,17 @@
     .dept-item {
       display: flex;
       flex-direction: column;
+      width: 100%;
       padding-bottom: 6px;
       border-bottom: 1px dashed #141c28;
     }
 
+    /* Fixed Row Layout: Spans entire width cleanly */
     .dept-main-row {
-      display: grid;
-      grid-template-columns: 46px 1fr 34px 70px;
+      display: flex;
+      justify-content: space-between;
       align-items: baseline;
+      width: 100%;
       gap: 6px;
     }
 
@@ -114,6 +117,7 @@
       font-size: 0.9rem;
       color: var(--text-white);
       font-family: ui-monospace, SFMono-Regular, monospace;
+      min-width: 45px;
     }
 
     .dept-dest {
@@ -124,6 +128,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       text-transform: uppercase;
+      flex-grow: 1;
     }
 
     .dept-plat {
@@ -132,19 +137,21 @@
       color: var(--text-white);
       text-align: center;
       font-family: ui-monospace, SFMono-Regular, monospace;
+      min-width: 35px;
     }
 
     .dept-status {
       font-weight: 700;
       font-size: 0.8rem;
       text-align: right;
+      min-width: 65px;
     }
 
     .status-ontime { color: var(--status-ontime); }
     .status-delayed { color: var(--status-delayed); }
     .status-cancelled { color: var(--status-cancelled); }
 
-    /* Fixed Marquee Track Wrapper */
+    /* FULL WIDTH MARQUEE FIX */
     .marquee-container {
       width: 100%;
       overflow: hidden;
@@ -153,23 +160,27 @@
       position: relative;
     }
 
-    /* Stable Continuous Marquee Animation */
     .marquee-text {
       display: inline-block;
       font-size: 0.72rem;
       color: var(--text-gray);
       font-family: ui-monospace, SFMono-Regular, monospace;
-      animation: smoothMarquee 15s linear infinite;
-      padding-left: 100%;
+      animation: fullWidthMarquee 15s linear infinite;
+      will-change: transform;
     }
 
     .marquee-text.notice {
       color: var(--text-yellow);
     }
 
-    @keyframes smoothMarquee {
-      0% { transform: translate3d(0, 0, 0); }
-      100% { transform: translate3d(-100%, 0, 0); }
+    /* Full width translation across the screen */
+    @keyframes fullWidthMarquee {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(-100%);
+      }
     }
 
     .welcome-screen {
@@ -416,7 +427,6 @@
         lastMinute = now.getMinutes();
       }
 
-      // Page rotation updated to 15 seconds per page
       let isFlipped = Math.floor(now.getSeconds() / 15) % 2 === 1;
 
       if (!isFlipped) {
