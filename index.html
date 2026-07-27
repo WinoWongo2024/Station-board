@@ -103,7 +103,6 @@
       border-bottom: 1px dashed #141c28;
     }
 
-    /* Fixed Row Layout: Spans entire width cleanly */
     .dept-main-row {
       display: flex;
       justify-content: space-between;
@@ -151,7 +150,7 @@
     .status-delayed { color: var(--status-delayed); }
     .status-cancelled { color: var(--status-cancelled); }
 
-    /* FULL WIDTH MARQUEE FIX */
+    /* FULL-WIDTH SCROLLING MARQUEE */
     .marquee-container {
       width: 100%;
       overflow: hidden;
@@ -165,7 +164,8 @@
       font-size: 0.72rem;
       color: var(--text-gray);
       font-family: ui-monospace, SFMono-Regular, monospace;
-      animation: fullWidthMarquee 15s linear infinite;
+      padding-left: 100%;
+      animation: continuousMarquee 14s linear infinite;
       will-change: transform;
     }
 
@@ -173,13 +173,12 @@
       color: var(--text-yellow);
     }
 
-    /* Full width translation across the screen */
-    @keyframes fullWidthMarquee {
+    @keyframes continuousMarquee {
       0% {
-        transform: translateX(100%);
+        transform: translate3d(0, 0, 0);
       }
       100% {
-        transform: translateX(-100%);
+        transform: translate3d(-100%, 0, 0);
       }
     }
 
@@ -336,6 +335,7 @@
 
     let allServices = [];
     let lastMinute = -1;
+    let lastStateFlipped = null; // Track flip state to prevent re-rendering every second!
 
     function generateServices() {
       let now = new Date();
@@ -419,32 +419,41 @@
     function tick() {
       let now = new Date();
 
+      // Clock ticks every second
       document.getElementById("clock-hhmm").innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
       document.getElementById("clock-ss").innerText = pad(now.getSeconds());
 
-      if (now.getMinutes() !== lastMinute) {
+      // Regenerate dataset when minute rolls over
+      let minuteChanged = now.getMinutes() !== lastMinute;
+      if (minuteChanged) {
         generateServices();
         lastMinute = now.getMinutes();
+        renderFormation();
       }
 
+      // Check if page state flipped (every 15 seconds)
       let isFlipped = Math.floor(now.getSeconds() / 15) % 2 === 1;
 
-      if (!isFlipped) {
-        renderScreen("screen1-list", allServices.slice(0, 4));
-        renderScreen("screen2-list", allServices.slice(4, 8));
-        document.getElementById("page1-tag").innerText = "Page 1 of 2";
-        document.getElementById("page2-tag").innerText = "Page 2 of 2";
-      } else {
-        renderScreen("screen1-list", allServices.slice(2, 6));
-        renderScreen("screen2-list", allServices.slice(6, 10));
-        document.getElementById("page1-tag").innerText = "Page 2 of 2";
-        document.getElementById("page2-tag").innerText = "Page 1 of 2";
-      }
+      // Render screen items ONLY when state changes or minute changes!
+      if (isFlipped !== lastStateFlipped || minuteChanged) {
+        lastStateFlipped = isFlipped;
 
-      renderFormation();
+        if (!isFlipped) {
+          renderScreen("screen1-list", allServices.slice(0, 4));
+          renderScreen("screen2-list", allServices.slice(4, 8));
+          document.getElementById("page1-tag").innerText = "Page 1 of 2";
+          document.getElementById("page2-tag").innerText = "Page 2 of 2";
+        } else {
+          renderScreen("screen1-list", allServices.slice(2, 6));
+          renderScreen("screen2-list", allServices.slice(6, 10));
+          document.getElementById("page1-tag").innerText = "Page 2 of 2";
+          document.getElementById("page2-tag").innerText = "Page 1 of 2";
+        }
+      }
     }
 
     generateServices();
+    renderFormation();
     tick();
     setInterval(tick, 1000);
   </script>
