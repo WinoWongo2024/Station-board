@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Leeds Station - Live Departures</title>
+  <title>Leeds Station [LDS] - Concourse Departures</title>
   <style>
     :root {
-      --bg-color: #080b10;
-      --panel-bg: #0d131f;
+      --bg-color: #06090e;
+      --panel-bg: #0b111a;
+      --subpanel-bg: #0e1624;
       --border-color: #1e293b;
-      --text-amber: #ffaa00;
+      --text-amber: #ffb703;
       --text-white: #f8fafc;
       --text-muted: #94a3b8;
-      --accent-blue: #0284c7;
       --status-green: #22c55e;
-      --status-red: #ef4444;
       --status-amber: #f59e0b;
+      --coach-bg: #1e293b;
+      --coach-border: #334155;
+      --coach-1st: #b45309;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -33,23 +35,29 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 16px;
+      padding: 20px 10px;
     }
 
-    .station-board {
+    .container {
       width: 100%;
-      max-width: 1000px;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* MAIN BOARD */
+    .station-board {
       background-color: var(--panel-bg);
       border: 2px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7);
       overflow: hidden;
     }
 
-    /* Header Styling */
     .board-header {
-      background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
-      padding: 20px 24px;
+      background: #0f172a;
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -57,7 +65,7 @@
     }
 
     .station-branding h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 800;
       letter-spacing: 1px;
       color: var(--text-white);
@@ -65,89 +73,71 @@
     }
 
     .station-branding p {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      letter-spacing: 0.5px;
-      margin-top: 2px;
     }
 
-    .live-clock {
-      font-family: monospace;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-amber);
-      background: #020617;
-      padding: 6px 14px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      letter-spacing: 1px;
-    }
-
-    /* Table Layout */
+    /* Table styling */
     .train-table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
+      table-layout: fixed;
     }
 
     .train-table th {
-      background-color: #0b1120;
+      background-color: #080d1a;
       color: var(--text-muted);
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border-color);
     }
 
     .train-row {
       border-bottom: 1px solid var(--border-color);
-      transition: background-color 0.2s ease;
-    }
-
-    .train-row:hover {
-      background-color: rgba(255, 255, 255, 0.02);
+      height: 64px;
     }
 
     .train-row td {
-      padding: 16px;
+      padding: 8px 16px;
       vertical-align: middle;
     }
 
-    /* Column Specifics */
-    .col-time {
-      font-family: monospace;
+    .col-time { width: 10%; font-family: monospace; font-size: 1.15rem; font-weight: 700; }
+    .col-dest { width: 45%; overflow: hidden; }
+    .col-plat { width: 12%; }
+    .col-operator { width: 18%; font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .col-status { width: 15%; text-align: right; }
+
+    .dest-title {
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--text-white);
-      width: 12%;
-    }
-
-    .col-dest {
-      width: 38%;
-    }
-
-    .dest-name {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-white);
-      letter-spacing: 0.5px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .calling-points {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      white-space: nowrap;
+    /* Marquee styling for intermediate stops */
+    .marquee-container {
+      width: 100%;
       overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 340px;
+      white-space: nowrap;
+      position: relative;
+      margin-top: 2px;
     }
 
-    .col-plat {
-      width: 15%;
+    .marquee-text {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: var(--text-amber);
+      font-family: monospace;
+      animation: marquee 16s linear infinite;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
     }
 
     .platform-badge {
@@ -157,113 +147,251 @@
       font-family: monospace;
       font-weight: 700;
       font-size: 0.95rem;
-      padding: 4px 10px;
+      padding: 2px 8px;
       border-radius: 4px;
       border: 1px solid #334155;
     }
 
-    .col-operator {
-      width: 15%;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .col-status {
-      width: 20%;
-      text-align: right;
-    }
-
     .status-pill {
-      display: inline-block;
       font-size: 0.85rem;
       font-weight: 700;
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 4px;
       text-transform: uppercase;
+      display: inline-block;
     }
 
-    .status-on-time {
-      color: var(--status-green);
-      background-color: rgba(34, 197, 94, 0.1);
-    }
-
-    .status-delayed {
-      color: var(--status-amber);
-      background-color: rgba(245, 158, 11, 0.1);
-    }
+    .status-on-time { color: var(--status-green); background-color: rgba(34, 197, 94, 0.1); }
+    .status-delayed { color: var(--status-amber); background-color: rgba(245, 158, 11, 0.1); }
 
     .exp-time {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--status-amber);
-      margin-top: 2px;
       display: block;
       font-family: monospace;
+      margin-top: 2px;
     }
 
-    /* Footer Pagination and Info */
+    /* FOOTER WITH CUSTOM CLOCK */
     .board-footer {
-      background-color: #0b1120;
+      background-color: #080d1a;
       padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-top: 2px solid var(--border-color);
-      font-size: 0.8rem;
-      color: var(--text-muted);
     }
 
-    .pagination-indicator {
-      font-weight: 600;
-      color: var(--text-amber);
+    /* Requested HH:MM:ss Clock Format */
+    .custom-clock {
       font-family: monospace;
+      color: var(--text-amber);
+      background: #030712;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: baseline;
     }
 
-    /* Responsive scaling for mobile */
+    .clock-main {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .clock-seconds {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-left: 2px;
+      opacity: 0.85;
+    }
+
+    .page-indicator {
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-amber);
+    }
+
+    /* SUB-BOARD: NEXT DEPARTURE & FORMATION */
+    .next-departure-panel {
+      background-color: var(--subpanel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-amber);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--status-green);
+      border-radius: 50%;
+    }
+
+    .next-train-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .next-train-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .next-train-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Formation / Carriage visualizer */
+    .formation-container {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .formation-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .train-formation {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .carriage {
+      background-color: var(--coach-bg);
+      border: 1px solid var(--coach-border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      min-width: 54px;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: monospace;
+      position: relative;
+    }
+
+    .carriage.first-class {
+      background-color: var(--coach-1st);
+      border-color: #d97706;
+    }
+
+    .carriage-label {
+      display: block;
+      font-size: 0.85rem;
+    }
+
+    .carriage-type {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .loco {
+      background-color: #334155;
+      border-radius: 8px 4px 4px 8px;
+      min-width: 45px;
+    }
+
     @media (max-width: 768px) {
-      .station-board { border: none; border-radius: 0; }
-      .calling-points { display: none; }
       .col-operator { display: none; }
-      .col-time { width: 20%; }
-      .col-dest { width: 50%; }
-      .col-plat { width: 30%; }
-      .col-status { display: none; }
+      .col-time { width: 15%; }
+      .col-dest { width: 55%; }
+      .col-plat { width: 15%; }
+      .col-status { width: 15%; }
     }
   </style>
 </head>
 <body>
 
-  <div class="station-board">
-    <!-- Header -->
-    <div class="board-header">
-      <div class="station-branding">
-        <h1>Leeds Station [LDS]</h1>
-        <p>Live Departures Board</p>
+  <div class="container">
+    <!-- MAIN DEPARTURE BOARD -->
+    <div class="station-board">
+      <div class="board-header">
+        <div class="station-branding">
+          <h1>Leeds Station [LDS]</h1>
+          <p>Main Concourse Live Departures</p>
+        </div>
       </div>
-      <div class="live-clock" id="live-clock">00:00:00</div>
+
+      <table class="train-table">
+        <thead>
+          <tr>
+            <th class="col-time">Time</th>
+            <th class="col-dest">Destination & Intermediate Calling Points</th>
+            <th class="col-plat">Plat</th>
+            <th class="col-operator">Operator</th>
+            <th class="col-status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="main-tbody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+
+      <!-- FOOTER WITH HH:MM:ss CLOCK BOTTOM-LEFT -->
+      <div class="board-footer">
+        <div class="custom-clock">
+          <span class="clock-main" id="clock-main">00:00</span>
+          <span class="clock-seconds" id="clock-seconds">:00</span>
+        </div>
+        <div class="page-indicator" id="page-indicator">Page 1 of 2</div>
+      </div>
     </div>
 
-    <!-- Departure Table -->
-    <table class="train-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Destination</th>
-          <th>Platform</th>
-          <th>Operator</th>
-          <th style="text-align: right;">Status</th>
-        </tr>
-      </i>
-      <tbody id="train-tbody">
-        <!-- Rendered dynamically -->
-      </tbody>
-    </table>
+    <!-- SUB-BOARD: IMMEDIATE NEXT DEPARTURE + COACH FORMATION -->
+    <div class="next-departure-panel">
+      <div class="panel-tag">Next Departure</div>
+      
+      <div class="next-train-details">
+        <div>
+          <div class="next-train-title" id="next-title">-- Loading --</div>
+          <div class="next-train-info" id="next-calling">Fetching route details...</div>
+        </div>
+        <div style="text-align: right;">
+          <div id="next-plat-badge"><span class="platform-badge">--</span></div>
+          <div class="next-train-info" id="next-operator" style="margin-top:4px;">--</div>
+        </div>
+      </div>
 
-    <!-- Footer -->
-    <div class="board-footer">
-      <span id="footer-update">Syncing real-time feed...</span>
-      <span class="pagination-indicator" id="page-indicator">Page 1 of 3</span>
+      <div class="formation-container">
+        <div class="formation-title" id="formation-header">Carriage Formation</div>
+        <div class="train-formation" id="carriage-diagram">
+          <!-- Coach diagram rendered dynamically -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -278,76 +406,71 @@
 
     const platforms = [
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-      "0A", "0B", "1A", "1B", "1C", "1D", "2A", "3A", "3B", "4A", "5B", "6A", "10A", "11D", "12C", "15"
+      "0A", "0B", "1A", "1B", "1C", "1D", "2A", "3A", "3B", "4A", "5B", "6A", "10A", "11D", "12C"
     ];
 
     const operators = ["Northern", "LNER", "TransPennine Express", "CrossCountry", "East Midlands Railway"];
 
     const sampleCallingPoints = {
-      "Harrogate": ["Burley Park", "Headingley", "Horsforth", "Pannal"],
-      "London King's Cross": ["Wakefield Westgate", "Doncaster", "Newark North Gate", "Stevenage"],
-      "Edinburgh": ["York", "Darlington", "Durham", "Newcastle", "Alnmouth"],
-      "Manchester Victoria": ["Bramley", "New Pudsey", "Bradford Int", "Halifax", "Hebden Bridge"],
-      "York": ["Garforth", "Micklefield", "Selby"],
-      "Skipton": ["Kirkstall Forge", "Shipley", "Bingley", "Keighley"]
+      "Harrogate": ["Burley Park", "Headingley", "Horsforth", "Pannal", "Harrogate"],
+      "London King's Cross": ["Wakefield Westgate", "Doncaster", "Newark North Gate", "Peterborough", "Stevenage", "London King's Cross"],
+      "Edinburgh": ["York", "Darlington", "Durham", "Newcastle", "Berwick-upon-Tweed", "Edinburgh"],
+      "Manchester Victoria": ["Bramley", "New Pudsey", "Bradford Interchange", "Halifax", "Hebden Bridge", "Manchester Victoria"],
+      "York": ["Cross Gates", "Garforth", "Micklefield", "Church Fenton", "Ulleskelf", "York"],
+      "Skipton": ["Kirkstall Forge", "Shipley", "Bingley", "Keighley", "Skipton"]
     };
 
     let trains = [];
     let lastMinute = -1;
 
-    function formatDigits(num) {
+    function pad(num) {
       return num.toString().padStart(2, "0");
     }
 
-    function generateSchedule() {
+    // Build schedules sorted strictly by time in the future
+    function generateTrainSchedule() {
       let now = new Date();
       trains = [];
-      // Generate 9 trains tracking around current time (-4 to +4 blocks)
-      for (let i = -4; i <= 4; i++) {
+
+      // Generate 12 future departures spaced across the next hour
+      for (let i = 1; i <= 12; i++) {
         let t = new Date(now.getTime() + i * 4 * 60000);
         let dest = destinations[Math.floor(Math.random() * destinations.length)];
-        let isDelayed = i < 0 && Math.random() > 0.5;
-        
+        let isDelayed = Math.random() < 0.25; // 25% delay chance
         let expTime = new Date(t.getTime());
-        if (isDelayed) expTime.setMinutes(expTime.getMinutes() + Math.floor(Math.random() * 15) + 5);
+
+        if (isDelayed) {
+          expTime.setMinutes(expTime.getMinutes() + Math.floor(Math.random() * 12) + 4);
+        }
+
+        let coachesCount = Math.random() > 0.5 ? 5 : 8; // 5-car or 8-car train
+        let coachLetters = ["A", "B", "C", "D", "E", "F", "G", "H"].slice(0, coachesCount);
 
         trains.push({
-          time: `${formatDigits(t.getHours())}:${formatDigits(t.getMinutes())}`,
+          rawTime: t,
+          timeStr: `${pad(t.getHours())}:${pad(t.getMinutes())}`,
           destination: dest,
           platform: platforms[Math.floor(Math.random() * platforms.length)],
           operator: operators[Math.floor(Math.random() * operators.length)],
           status: isDelayed ? "Delayed" : "On time",
-          expected: isDelayed ? `${formatDigits(expTime.getHours())}:${formatDigits(expTime.getMinutes())}` : null,
-          stops: sampleCallingPoints[dest] || ["Leeds", "Local Stops", "Destination Final"]
+          expected: isDelayed ? `${pad(expTime.getHours())}:${pad(expTime.getMinutes())}` : null,
+          stops: sampleCallingPoints[dest] || ["Leeds", "Local Calling Stations", dest],
+          coaches: coachLetters
         });
       }
     }
 
-    function updateApp() {
-      let now = new Date();
-      
-      // Update the 1-second precision digital clock header
-      document.getElementById("live-clock").innerText = 
-        `${formatDigits(now.getHours())}:${formatDigits(now.getMinutes())}:${formatDigits(now.getSeconds())}`;
-
-      // Re-generate pool data once every minute change
-      if (now.getMinutes() !== lastMinute) {
-        generateSchedule();
-        lastMinute = now.getMinutes();
-      }
-
-      // Pagination calculation: changes page every 6 seconds across total items
-      let pageSize = 3;
+    function renderMainBoard(now) {
+      // Show 6 trains per page
+      let pageSize = 6;
       let totalPages = Math.ceil(trains.length / pageSize);
-      let currentPage = Math.floor((now.getSeconds() / 6) % totalPages);
+      let currentPage = Math.floor((now.getSeconds() / 7) % totalPages); // Switches page every 7s
 
-      let start = currentPage * pageSize;
-      let pageItems = trains.slice(start, start + pageSize);
-
-      let tbody = document.getElementById("train-tbody");
+      let pageTrains = trains.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+      let tbody = document.getElementById("main-tbody");
       tbody.innerHTML = "";
 
-      pageItems.forEach(train => {
+      pageTrains.forEach(train => {
         let tr = document.createElement("tr");
         tr.className = "train-row";
 
@@ -355,13 +478,15 @@
           ? `<span class="status-pill status-on-time">On time</span>`
           : `<span class="status-pill status-delayed">Delayed</span><span class="exp-time">Exp ${train.expected}</span>`;
 
-        let callingText = `Stops at: ${train.stops.join(", ")}`;
+        let stopsFormatted = `Calling at: ${train.stops.join(" • ")}`;
 
         tr.innerHTML = `
-          <td class="col-time">${train.time}</td>
+          <td class="col-time">${train.timeStr}</td>
           <td class="col-dest">
-            <div class="dest-name">${train.destination}</div>
-            <div class="calling-points">${callingText}</div>
+            <div class="dest-title">${train.destination}</div>
+            <div class="marquee-container">
+              <span class="marquee-text">${stopsFormatted}</span>
+            </div>
           </td>
           <td class="col-plat"><span class="platform-badge">${train.platform}</span></td>
           <td class="col-operator">${train.operator}</td>
@@ -371,13 +496,64 @@
       });
 
       document.getElementById("page-indicator").innerText = `Page ${currentPage + 1} of ${totalPages}`;
-      document.getElementById("footer-update").innerText = `System Active — Auto-Refreshing Live`;
     }
 
-    // Initialize immediately then tick every single second
-    generateSchedule();
-    updateApp();
-    setInterval(updateApp, 1000);
+    function renderNextDepartureSubPanel() {
+      // Train closest in time in the future is always trains[0]
+      let nextTrain = trains[0];
+      if (!nextTrain) return;
+
+      document.getElementById("next-title").innerText = `${nextTrain.timeStr} ${nextTrain.destination}`;
+      document.getElementById("next-calling").innerText = `Calling at: ${nextTrain.stops.join(", ")}`;
+      document.getElementById("next-plat-badge").innerHTML = `<span class="platform-badge">Plat ${nextTrain.platform}</span>`;
+      document.getElementById("next-operator").innerText = `${nextTrain.operator} • ${nextTrain.status}`;
+
+      document.getElementById("formation-header").innerText = 
+        `Train Formation (${nextTrain.coaches.length} Coaches — Front of train right ➔)`;
+
+      let diagram = document.getElementById("carriage-diagram");
+      diagram.innerHTML = "";
+
+      // Locomotive
+      let loco = document.createElement("div");
+      loco.className = "carriage loco";
+      loco.innerHTML = `<span class="carriage-label">LOCO</span><span class="carriage-type">Engine</span>`;
+      diagram.appendChild(loco);
+
+      // Render carriages
+      nextTrain.coaches.forEach((letter, idx) => {
+        let isFirstClass = idx === 0;
+        let car = document.createElement("div");
+        car.className = `carriage ${isFirstClass ? "first-class" : ""}`;
+        car.innerHTML = `
+          <span class="carriage-label">${letter}</span>
+          <span class="carriage-type">${isFirstClass ? "1st Class" : "Std Class"}</span>
+        `;
+        diagram.appendChild(car);
+      });
+    }
+
+    function tick() {
+      let now = new Date();
+
+      // Clock render: HH:MM in large font, :ss smaller
+      document.getElementById("clock-main").innerText = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      document.getElementById("clock-seconds").innerText = `:${pad(now.getSeconds())}`;
+
+      // Refresh mock dataset on minute rollover
+      if (now.getMinutes() !== lastMinute) {
+        generateTrainSchedule();
+        lastMinute = now.getMinutes();
+      }
+
+      renderMainBoard(now);
+      renderNextDepartureSubPanel();
+    }
+
+    // Initialize application
+    generateTrainSchedule();
+    tick();
+    setInterval(tick, 1000);
   </script>
 </body>
 </html>
